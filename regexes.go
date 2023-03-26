@@ -1,6 +1,10 @@
 package validator
 
-import "regexp"
+import (
+	"errors"
+	"fmt"
+	"regexp"
+)
 
 const (
 	alphaRegexString          = "^[a-zA-Z]+$"
@@ -59,6 +63,14 @@ var (
 )
 
 func matchesRegex(regex *regexp.Regexp, field interface{}) bool {
-	fieldAsString := field.(string) //this will panic inherently
-	return regex.MatchString(fieldAsString)
+	var testVal string
+	if v, ok := field.(string); ok {
+		testVal = v
+	} else if v, ok := field.(fmt.Stringer); ok {
+		testVal = v.String()
+	} else {
+		panic(errors.New("unable to retrieve field as string"))
+	}
+
+	return regex.MatchString(testVal)
 }
